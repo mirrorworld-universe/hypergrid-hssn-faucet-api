@@ -1,6 +1,6 @@
-# HyperGrid HSSN Faucet API
+# HyperGrid Faucet API
 
-This Faucet API endpoint allows testnet HSSN providers to claim SOL for the HSSN Nodes.
+This Faucet API endpoint allows HyperGrid Testent Grid operatrs to request SOL for their users / wallets.
 
 ## Install pm2
 
