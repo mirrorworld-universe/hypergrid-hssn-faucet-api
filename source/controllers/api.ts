@@ -11,7 +11,7 @@ const cmd = require('node-cmd');
 const apiBaseUrl = "https://challenges.cloudflare.com";
 const secretKey = process.env.SECRETKEY as string;
 const SOLANA_CLI_PATH = "/home/ubuntu/.local/share/solana/install/active_release/bin/solana";
-const ID_LOCATION = ""
+const ID_LOCATION = "/home/ubuntu/.config/solana/id.json"
 
 const maxLimitPerAddr = 1;
 const eightHoursTs = 1000 * 60 * 60 * 8;
