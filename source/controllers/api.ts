@@ -1,16 +1,17 @@
 import { config as dotEnvConfig } from 'dotenv';
 dotEnvConfig();
 
-import fs from 'fs';
-import { Request, Response, NextFunction } from 'express';
+import { Connection, Keypair, PublicKey, sendAndConfirmTransaction, SystemProgram, Transaction } from '@solana/web3.js';
 import axios from "axios";
-import { Connection, PublicKey } from '@solana/web3.js';
+import { NextFunction, Request, Response } from 'express';
+import fs from 'fs';
 // import cmd from 'node-cmd';
 const cmd = require('node-cmd');
 
 const apiBaseUrl = "https://challenges.cloudflare.com";
 const secretKey = process.env.SECRETKEY as string;
 const SOLANA_CLI_PATH = "/home/ubuntu/.local/share/solana/install/active_release/bin/solana";
+const ID_LOCATION = ""
 
 const maxLimitPerAddr = 1;
 const eightHoursTs = 1000 * 60 * 60 * 8;
@@ -27,6 +28,31 @@ const validateSolanaAddress = (address: string): boolean => {
   }
 }
 
+
+let get_keypair = (): Keypair => {
+  let kp = Keypair.fromSecretKey(new Uint8Array(JSON.parse(fs.readFileSync(ID_LOCATION).toString())))
+
+  return kp;
+}
+
+let transfer_sol = async (address: string, amount: number): Promise<string> => {
+
+  let id_kp = get_keypair()
+  let toPubkey = new PublicKey(address)
+  let lamports = Math.floor(amount * 1e9);
+
+  let transaction = new Transaction().add(SystemProgram.transfer({
+    fromPubkey: id_kp.publicKey,
+    toPubkey,
+    lamports
+  }));
+
+  let connection = new Connection("http://localhost:8899")
+  const sig = await sendAndConfirmTransaction(connection, transaction, [id_kp])
+
+  return sig;
+}
+
 const airdrop = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Add address validation
@@ -39,7 +65,7 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
     if (isNaN(amount) || amount <= 0) {
       return res.status(401).json({ error: 'Amount must be a positive number' });
     }
-    
+
     if (amount > 0.5) return res.status(401).json({ error: 'Airdrop amount must <= 0.5' });
 
     const requestPath = `/turnstile/v0/siteverify`;
@@ -62,13 +88,13 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
     if (requestCounts[clientAddr] >= maxLimitPerAddr) {
       return res.status(429).send({ message: "To maintain adequate balances for all users, the Faucet distributes 0.5 Test SOL every 8 hours." });
     }
-    
+
     const connection = new Connection('https://api.mainnet-beta.solana.com');
     try {
       const publicKey = new PublicKey(req.params.user);
       const balance = await connection.getBalance(publicKey);
       const solBalance = balance / 1e9;
-      
+
       if (solBalance < 0.01) {
         return res.status(401).json({ error: 'You need at least 0.01 SOL in your wallet on Solana Mainnet to access the faucet.' });
       }
@@ -76,14 +102,17 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ error: 'Unable to get mainnet wallet balance' });
     }
 
-    const recipient = cmd.runSync([
-      SOLANA_CLI_PATH,
-      "transfer",
-      req.params.user,
-      req.params.amount,
-      "--allow-unfunded-recipient",
-      "--url localhost"
-    ].join(" "));
+
+    // const recipient = cmd.runSync([
+    //   SOLANA_CLI_PATH,
+    //   "transfer",
+    //   req.params.user,
+    //   req.params.amount,
+    //   "--allow-unfunded-recipient",
+    //   "--url localhost"
+    // ].join(" "));
+
+    let recipient = await transfer_sol(req.params.user, amount)
 
     if (requestCounts[clientAddr]) {
       requestCounts[clientAddr]++;
@@ -116,14 +145,16 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
 
     if (req.get('API-KEY') != '8c0f3d5b-9e47-4f1a-b8d6-2e9a7f8c4d1e') return res.status(401).json({ error: 'Invalid apikey' });
 
-    const recipient = cmd.runSync([
-      SOLANA_CLI_PATH,
-      "transfer",
-      body.data.user,
-      body.data.amount,
-      "--allow-unfunded-recipient",
-      "--url localhost"
-    ].join(" "));
+    // const recipient = cmd.runSync([
+    //   SOLANA_CLI_PATH,
+    //   "transfer",
+    //   body.data.user,
+    //   body.data.amount,
+    //   "--allow-unfunded-recipient",
+    //   "--url localhost"
+    // ].join(" "));
+
+    let recipient = await transfer_sol(req.params.user, amount)
 
     return res.status(200).json({ status: "ok", data: recipient });
   } catch (error: any) {
