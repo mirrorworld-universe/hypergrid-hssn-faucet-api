@@ -34,8 +34,10 @@ router.use("/", (req, res, next) => {
 });
 
 
+console.log("all env ", process.env);
+
 /** Routes */
-router.use("/", api);
+router.use("/api", api);
 
 /** Error handling */
 router.use((req, res, next) => {

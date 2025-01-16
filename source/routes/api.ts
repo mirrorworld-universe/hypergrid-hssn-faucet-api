@@ -32,6 +32,10 @@ const rateLimiter = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+router.get('/test', async (req: Request, res: Response, next: NextFunction) => {
+  res.send("hello world");
+})
+
 if (process.env.USE_CONTROLLER == "sonic") {
   router.get('/airdrop/:user/:amount/:token', sonic_ctl.airdrop);
   router.get('/wallets-count', sonic_ctl.walletsCount);
