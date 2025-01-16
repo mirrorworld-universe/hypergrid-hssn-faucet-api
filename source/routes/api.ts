@@ -44,4 +44,4 @@ if (process.env.USE_CONTROLLER == "sonic") {
 
 
 
-export = router;
+export default router;
