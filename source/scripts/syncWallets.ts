@@ -1,6 +1,6 @@
-import schedule from 'node-schedule';
-import fs from 'fs';
 import axios from "axios";
+import fs from 'fs';
+import schedule from 'node-schedule';
 
 const apiBaseUrl = "http://localhost:8899";
 
@@ -38,6 +38,10 @@ async function syncWallets() {
 }
 
 schedule.scheduleJob({ hour: 16, minute: 0, second: 0 }, async () => {
+  if (process.env.USE_CONTROLLER != 'sonic') {
+    console.log("skip syncWallets for non sonic controller")
+    return;
+  }
   console.log('Wallets Sync Start @', new Date().toLocaleString('chinese', { hour12: false }));
   await syncWallets();
   console.log('Wallets Sync Done @', new Date().toLocaleString('chinese', { hour12: false }));

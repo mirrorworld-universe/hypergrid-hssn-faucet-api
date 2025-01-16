@@ -1,8 +1,8 @@
 import { config as dotEnvConfig } from 'dotenv';
 dotEnvConfig();
 
-import { Connection, PublicKey } from '@solana/web3.js';
 import { WebClient } from '@slack/web-api';
+import { Connection, PublicKey } from '@solana/web3.js';
 import schedule from 'node-schedule';
 
 const WALLET_ADDRESS = '2b1opjN2ztTRe3jit8gN3Qc6AVVo5jixKmSqzfU4jkjP';
@@ -36,6 +36,10 @@ async function checkFaucet() {
 }
 
 schedule.scheduleJob({ hour: 7, minute: 0, second: 0 }, async () => {
+  if (process.env.USE_CONTROLLER != 'sonic') {
+    console.log("skip check faucet for non sonic controller")
+    return;
+  }
   console.log('Check Faucet Start @', new Date().toLocaleString('chinese', { hour12: false }));
   await checkFaucet();
   console.log('Check Faucet Done @', new Date().toLocaleString('chinese', { hour12: false }));
