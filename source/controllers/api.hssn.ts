@@ -110,7 +110,8 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
     const { client, wallet } = await initCosmosClient();
     const senderAddress = (await wallet.getAccounts())[0].address;
     const recipientAddress = body.data.user;
-    const amount = [{ denom: "hsol", amount: `${body.data.amount}` }];
+    const body_amount = BigInt(Math.floor(body.data.amount * 1e18))
+    const amount = [{ denom: "hsol", amount: `${body_amount}` }];
     const fee: StdFee = { amount: [], gas: "200000" };
 
     const resultTx = await client.sendTokens(senderAddress, recipientAddress, amount, fee);

@@ -35,11 +35,8 @@ router.use("/", (req, res, next) => {
   next();
 });
 
-
-console.log("all env ", process.env);
-
 /** Routes */
-router.use("/api", api);
+router.use("/", api);
 
 /** Error handling */
 router.use((req, res, next) => {
