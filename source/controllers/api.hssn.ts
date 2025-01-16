@@ -1,3 +1,5 @@
+import { SigningStargateClient, StdFee } from '@cosmjs/stargate';
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { config as dotEnvConfig } from 'dotenv';
 dotEnvConfig();
 
@@ -9,7 +11,7 @@ import axios from "axios";
 const cmd = require('node-cmd');
 
 const apiBaseUrl = "https://challenges.cloudflare.com";
-const secretKey = process.env.SECRETKEY as string;
+const secretKey = process.env.COSMOS_SECRETKEY as string;
 const COSMOS_CLI_PATH = "/home/ubuntu/.hypergrid-ssn/bin/hypergrid-ssnd";
 
 const maxLimitPerAddr = 1;
@@ -25,6 +27,13 @@ const validateAmount = (amount: any): boolean => {
   const num = Number(amount);
   return !isNaN(num) && num > 0 && num <= 1;
 }
+
+const initCosmosClient = async () => {
+  const mnemonic = process.env.COSMOS_MNEMONIC as string;
+  const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic);
+  const client = await SigningStargateClient.connectWithSigner("http://localhost:26657", wallet);
+  return { client, wallet };
+};
 
 const airdrop = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -56,14 +65,21 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(429).send({ message: "To maintain adequate balances for all users, the Faucet distributes 1 Test hSOL every 8 hours." });
     }
 
-    const recipient = cmd.runSync([
-      COSMOS_CLI_PATH,
-      "tx bank send my_validator",
-      req.params.user,
-      `${req.params.amount}hsol`,
-      "--chain-id hypergridssn",
-      "--keyring-backend test -y"
-    ].join(" "));
+    const { client, wallet } = await initCosmosClient();
+    const senderAddress = (await wallet.getAccounts())[0].address;
+    const recipientAddress = req.params.user;
+    const amount = [{ denom: "hsol", amount: `${req.params.amount}` }];
+    const fee: StdFee = { amount: [], gas: "200000" };
+
+    const resultTx = await client.sendTokens(senderAddress, recipientAddress, amount, fee);
+    // const recipient = cmd.runSync([
+    //   COSMOS_CLI_PATH,
+    //   "tx bank send my_validator",
+    //   req.params.user,
+    //   `${req.params.amount}hsol`,
+    //   "--chain-id hypergridssn",
+    //   "--keyring-backend test -y"
+    // ].join(" "));
 
     if (requestCounts[clientAddr]) {
       requestCounts[clientAddr]++;
@@ -71,7 +87,7 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
       requestCounts[clientAddr] = 1;
     }
 
-    return res.status(200).json({ status: "ok", data: {} });
+    return res.status(200).json({ status: "ok", data: resultTx });
   } catch (error: any) {
     return res.status(401).json({ error: 'An error occurred while processing your request' });
   }
@@ -90,16 +106,23 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
       return res.status(400).json({ error: 'Amount must be a number between 0 and 1' });
     }
 
-    const recipient = cmd.runSync([
-      COSMOS_CLI_PATH,
-      "tx bank send my_validator",
-      body.data.user,
-      `${body.data.amount}hsol`,
-      "--chain-id hypergridssn",
-      "--keyring-backend test -y"
-    ].join(" "));
+    const { client, wallet } = await initCosmosClient();
+    const senderAddress = (await wallet.getAccounts())[0].address;
+    const recipientAddress = body.data.user;
+    const amount = [{ denom: "hsol", amount: `${body.data.amount}` }];
+    const fee: StdFee = { amount: [], gas: "200000" };
 
-    return res.status(200).json({ status: "ok", data: {} });
+    const resultTx = await client.sendTokens(senderAddress, recipientAddress, amount, fee);
+    // const recipient = cmd.runSync([
+    //   COSMOS_CLI_PATH,
+    //   "tx bank send my_validator",
+    //   body.data.user,
+    //   `${body.data.amount}hsol`,
+    //   "--chain-id hypergridssn",
+    //   "--keyring-backend test -y"
+    // ].join(" "));
+
+    return res.status(200).json({ status: "ok", data: resultTx });
   } catch (error: any) {
     return res.status(401).json({ error: 'An error occurred while processing your request' });
   }

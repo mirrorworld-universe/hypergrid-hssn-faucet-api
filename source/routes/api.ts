@@ -1,7 +1,8 @@
 /** source/routes/posts.ts */
-import express from "express";
-import { Request, Response, NextFunction } from 'express';
-import controller from "../controllers/api";
+import express, { NextFunction, Request, Response } from "express";
+import sonic_ctl from "../controllers/api";
+import cosmos from "../controllers/api.hssn";
+
 
 const router = express.Router();
 
@@ -31,8 +32,16 @@ const rateLimiter = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-router.get('/airdrop/:user/:amount/:token', controller.airdrop);
-router.get('/wallets-count', controller.walletsCount);
-router.post('/airdrop', controller.airdropWithApikey);
+if (process.env.USE_CONTROLLER == "sonic") {
+  router.get('/airdrop/:user/:amount/:token', sonic_ctl.airdrop);
+  router.get('/wallets-count', sonic_ctl.walletsCount);
+  router.post('/airdrop', sonic_ctl.airdropWithApikey);
+} else {
+  router.get('/airdrop/:user/:amount/:token', cosmos.airdrop);
+  router.get('/wallets-count', cosmos.walletsCount);
+  router.post('/airdrop', cosmos.airdropWithApikey);
+}
+
+
 
 export = router;
