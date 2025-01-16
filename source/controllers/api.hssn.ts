@@ -1,11 +1,11 @@
-import { SigningStargateClient, StdFee } from '@cosmjs/stargate';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { SigningStargateClient, StdFee } from '@cosmjs/stargate';
 import { config as dotEnvConfig } from 'dotenv';
 dotEnvConfig();
 
-import fs from 'fs';
-import { Request, Response, NextFunction } from 'express';
 import axios from "axios";
+import { NextFunction, Request, Response } from 'express';
+import fs from 'fs';
 
 // import cmd from 'node-cmd';
 const cmd = require('node-cmd');
@@ -97,6 +97,7 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
   try {
     const body: any = req.body;
 
+    console.log("body: ", body);
     if (req.get('API-KEY') != 'bec50c3a-ea09-42c2-a242-1dacbe90ce33') return res.status(401).json({ error: 'Invalid apikey' });
 
     if (!validateCosmosAddress(body.data.user)) {
@@ -124,6 +125,7 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
 
     return res.status(200).json({ status: "ok", data: resultTx });
   } catch (error: any) {
+    console.error(error);
     return res.status(401).json({ error: 'An error occurred while processing your request' });
   }
 };
