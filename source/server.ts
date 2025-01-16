@@ -1,6 +1,6 @@
 /** source/server.ts */
-import http from "http";
 import express, { Express } from "express";
+import http from "http";
 import morgan from "morgan";
 
 import api from "./routes/api";
@@ -33,7 +33,7 @@ router.use("/", api);
 
 /** Error handling */
 router.use((req, res, next) => {
-  const error = new Error("not found");
+  const error = new Error("not found, req_path: " + req.path);
   return res.status(404).json({
     message: error.message,
   });
