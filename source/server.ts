@@ -28,6 +28,12 @@ router.use((req, res, next) => {
   next();
 });
 
+router.use("/", (req, res, next) => {
+  console.log(`Request received for path: ${req.path}`);
+  next();
+});
+
+
 /** Routes */
 router.use("/", api);
 
