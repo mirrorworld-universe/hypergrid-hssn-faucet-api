@@ -1,4 +1,5 @@
 /** source/server.ts */
+import bodyParser from "body-parser";
 import express, { Express } from "express";
 import http from "http";
 import morgan from "morgan";
@@ -12,7 +13,8 @@ router.use(morgan("combined"));
 /** Parse the request */
 router.use(express.urlencoded({ extended: false }));
 /** Takes care of JSON data */
-router.use(express.json());
+router.use(bodyParser.json());
+// router.use(express.json());
 
 /** RULES OF OUR API */
 router.use((req, res, next) => {
