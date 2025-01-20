@@ -25,7 +25,7 @@ const validateCosmosAddress = (address: string): boolean => {
 
 const validateAmount = (amount: any): boolean => {
   const num = Number(amount);
-  return !isNaN(num) && num > 0 && num <= 1;
+  return !isNaN(num) && num > 1 && num <= 3;
 }
 
 const initCosmosClient = async () => {
@@ -41,7 +41,7 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(400).json({ error: 'Invalid cosmos address format' });
     }
     if (!validateAmount(req.params.amount)) {
-      return res.status(400).json({ error: 'Amount must be a number between 0 and 1' });
+      return res.status(400).json({ error: 'Amount must be a integer between 1 and 3, eg: 1,2,3' });
     }
 
     const requestPath = `/turnstile/v0/siteverify`;
@@ -68,8 +68,9 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
     const { client, wallet } = await initCosmosClient();
     const senderAddress = (await wallet.getAccounts())[0].address;
     const recipientAddress = req.params.user;
-    const amount = [{ denom: "hsol", amount: `${req.params.amount}` }];
-    const fee: StdFee = { amount: [], gas: "200000" };
+    let amount_int = Math.floor(Number(req.params.amount))
+    const amount = [{ denom: "hsol", amount: amount_int.toString() }];
+    const fee: StdFee = { amount: [], gas: "2000000" };
 
     const resultTx = await client.sendTokens(senderAddress, recipientAddress, amount, fee);
     // const recipient = cmd.runSync([
@@ -86,8 +87,13 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
     } else {
       requestCounts[clientAddr] = 1;
     }
+    let tmp_rs = { ...resultTx };
+    // @ts-ignore
+    tmp_rs.gasUsed = tmp_rs.gasUsed.toString();
+    // @ts-ignore
+    tmp_rs.gasWanted = tmp_rs.gasWanted.toString();
+    return res.status(200).json({ status: "ok", data: tmp_rs });
 
-    return res.status(200).json({ status: "ok", data: resultTx });
   } catch (error: any) {
     return res.status(401).json({ error: 'An error occurred while processing your request' });
   }
@@ -110,9 +116,9 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
     const { client, wallet } = await initCosmosClient();
     const senderAddress = (await wallet.getAccounts())[0].address;
     const recipientAddress = body.data.user;
-    const body_amount = BigInt(Math.floor(body.data.amount * 1e18))
-    const amount = [{ denom: "hsol", amount: `${body_amount}` }];
-    const fee: StdFee = { amount: [], gas: "200000" };
+    let amount_int = Math.floor(Number(body.data.amount))
+    const amount = [{ denom: "hsol", amount: amount_int.toString() }];
+    const fee: StdFee = { amount: [], gas: "2000000" };
 
     const resultTx = await client.sendTokens(senderAddress, recipientAddress, amount, fee);
     // const recipient = cmd.runSync([
@@ -123,8 +129,12 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
     //   "--chain-id hypergridssn",
     //   "--keyring-backend test -y"
     // ].join(" "));
-
-    return res.status(200).json({ status: "ok", data: resultTx });
+    let tmp_rs = { ...resultTx };
+    // @ts-ignore
+    tmp_rs.gasUsed = tmp_rs.gasUsed.toString();
+    // @ts-ignore
+    tmp_rs.gasWanted = tmp_rs.gasWanted.toString();
+    return res.status(200).json({ status: "ok", data: tmp_rs });
   } catch (error: any) {
     console.error(error);
     return res.status(401).json({ error: 'An error occurred while processing your request' });
