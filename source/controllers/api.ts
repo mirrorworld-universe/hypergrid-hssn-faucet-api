@@ -132,7 +132,11 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
     const body: any = req.body;
     console.log("sonic body, ", body);
     // Add address validation
-    if (!validateSolanaAddress(body.data.user)) {
+    let user = body.data.user;
+    if (user == null) {
+      return res.status(401).json({ error: "user should not be null" });
+    }
+    if (!validateSolanaAddress(user)) {
       return res.status(401).json({ error: 'Invalid Solana address' });
     }
 
@@ -157,7 +161,7 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
     //   "--url localhost"
     // ].join(" "));
 
-    let recipient = await transfer_sol(req.params.user, amount)
+    let recipient = await transfer_sol(user, amount)
 
     return res.status(200).json({ status: "ok", data: recipient });
   } catch (error: any) {
