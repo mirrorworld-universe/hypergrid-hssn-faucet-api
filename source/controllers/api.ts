@@ -36,16 +36,17 @@ let get_keypair = (): Keypair => {
 }
 
 let transfer_sol = async (address: string, amount: number): Promise<string> => {
-
+  console.log("start transfer sol")
   let id_kp = get_keypair()
   let toPubkey = new PublicKey(address)
   let lamports = Math.floor(amount * 1e9);
-
+  console.log("after gen lamports");
   let transaction = new Transaction().add(SystemProgram.transfer({
     fromPubkey: id_kp.publicKey,
     toPubkey,
     lamports
   }));
+  console.log("after gen transaction")
 
   let connection = new Connection("http://localhost:8899")
   const sig = await sendAndConfirmTransaction(connection, transaction, [id_kp])
