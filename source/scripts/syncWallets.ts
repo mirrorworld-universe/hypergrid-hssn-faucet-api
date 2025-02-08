@@ -1,6 +1,8 @@
 import axios from "axios";
 import fs from 'fs';
 import schedule from 'node-schedule';
+import { config as dotEnvConfig } from 'dotenv';
+dotEnvConfig();
 
 const apiBaseUrl = "http://localhost:8899";
 
