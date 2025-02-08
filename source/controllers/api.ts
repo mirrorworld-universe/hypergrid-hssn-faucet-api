@@ -130,17 +130,19 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
 const airdropWithApikey = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const body: any = req.body;
-    console.log("body, ", body);
+    console.log("sonic airdrop with api key body, ", body);
     // Add address validation
     if (!validateSolanaAddress(body.data.user)) {
       return res.status(401).json({ error: 'Invalid Solana address' });
     }
 
     // Add amount validation
+    console.log("start number amount")
     const amount = Number(body.data.amount);
     if (isNaN(amount) || amount <= 0) {
       return res.status(401).json({ error: 'Amount must be a positive number' });
     }
+    console.log("end number amount");
 
     if (amount > 1) return res.status(401).json({ error: 'Airdrop amount must <= 1' });
 
