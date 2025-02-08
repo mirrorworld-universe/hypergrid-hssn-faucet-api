@@ -130,7 +130,7 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
 const airdropWithApikey = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const body: any = req.body;
-    console.log("sonic airdrop with api key body, ", body);
+    console.log("sonic body, ", body);
     // Add address validation
     if (!validateSolanaAddress(body.data.user)) {
       return res.status(401).json({ error: 'Invalid Solana address' });

@@ -103,7 +103,7 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
   try {
     const body: any = req.body;
 
-    console.log("body: ", body);
+    console.log("hssn body: ", body);
     if (req.get('API-KEY') != 'bec50c3a-ea09-42c2-a242-1dacbe90ce33') return res.status(401).json({ error: 'Invalid apikey' });
 
     if (!validateCosmosAddress(body.data.user)) {
