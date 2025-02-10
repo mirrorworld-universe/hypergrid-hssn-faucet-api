@@ -150,7 +150,7 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
 
     if (amount > 1) return res.status(401).json({ error: 'Airdrop amount must <= 1' });
 
-    if (req.get('API-KEY') != '8c0f3d5b-9e47-4f1a-b8d6-2e9a7f8c4d1e') return res.status(401).json({ error: 'Invalid apikey' });
+    if (req.get('API-KEY') != process.env.SONIC_API_KEY) return res.status(401).json({ error: 'Invalid apikey' });
 
     // const recipient = cmd.runSync([
     //   SOLANA_CLI_PATH,
