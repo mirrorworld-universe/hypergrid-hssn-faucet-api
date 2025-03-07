@@ -1,7 +1,7 @@
 import { config as dotEnvConfig } from 'dotenv';
 dotEnvConfig();
 
-import { Connection, Keypair, PublicKey, sendAndConfirmTransaction, SystemProgram, Transaction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, sendAndConfirmTransaction, SystemProgram, Transaction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import axios from "axios";
 import { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
@@ -13,7 +13,7 @@ const secretKey = process.env.SECRETKEY as string;
 const SOLANA_CLI_PATH = "/home/ubuntu/.local/share/solana/install/active_release/bin/solana";
 const ID_LOCATION = "/home/ubuntu/.config/solana/id.json"
 
-const maxLimitPerAddr = 1;
+const maxLimitPerAddr = 3;
 const eightHoursTs = 1000 * 60 * 60 * 8;
 let lastTs = 0;
 let requestCounts: any = {};
@@ -41,15 +41,23 @@ let transfer_sol = async (address: string, amount: number): Promise<string> => {
   let toPubkey = new PublicKey(address)
   let lamports = Math.floor(amount * 1e9);
   console.log("after gen lamports");
-  let transaction = new Transaction().add(SystemProgram.transfer({
+  let ix =SystemProgram.transfer({
     fromPubkey: id_kp.publicKey,
     toPubkey,
     lamports
-  }));
+  });
   console.log("after gen transaction")
 
   let connection = new Connection("http://localhost:8899")
-  const sig = await sendAndConfirmTransaction(connection, transaction, [id_kp])
+  let msgV0 = new TransactionMessage({
+    payerKey: id_kp.publicKey,
+    instructions: [ix],
+    recentBlockhash: (await connection.getLatestBlockhash()).blockhash
+  }).compileToV0Message();
+  let tx = new VersionedTransaction(msgV0)
+  tx.sign([id_kp])
+  let sig = connection.sendTransaction(tx)
+  // const sig = await sendAndConfirmTransaction(connection, transaction, [id_kp])
 
   return sig;
 }
@@ -67,7 +75,7 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ error: 'Amount must be a positive number' });
     }
 
-    if (amount > 0.5) return res.status(401).json({ error: 'Airdrop amount must <= 0.5' });
+    if (amount > 5) return res.status(401).json({ error: 'Airdrop amount must <= 5' });
 
     const requestPath = `/turnstile/v0/siteverify`;
     const body = {
@@ -87,7 +95,7 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
     const clientAddr = req.params.user;
 
     if (requestCounts[clientAddr] >= maxLimitPerAddr) {
-      return res.status(429).send({ message: "To maintain adequate balances for all users, the Faucet distributes 0.5 Test SOL every 8 hours." });
+      return res.status(429).send({ message: "To maintain adequate balances for all users, the Faucet distributes 5 Test SOL every 8 hours." });
     }
 
     const connection = new Connection('https://api.mainnet-beta.solana.com');
@@ -148,7 +156,7 @@ const airdropWithApikey = async (req: Request, res: Response, next: NextFunction
     }
     console.log("end number amount");
 
-    if (amount > 1) return res.status(401).json({ error: 'Airdrop amount must <= 1' });
+    if (amount > 5) return res.status(401).json({ error: 'Airdrop amount must <= 5' });
 
     if (req.get('API-KEY') != process.env.SONIC_API_KEY) return res.status(401).json({ error: 'Invalid apikey' });
 

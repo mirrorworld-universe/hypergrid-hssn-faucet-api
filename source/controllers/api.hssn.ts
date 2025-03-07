@@ -14,7 +14,7 @@ const apiBaseUrl = "https://challenges.cloudflare.com";
 const secretKey = process.env.COSMOS_SECRETKEY as string;
 const COSMOS_CLI_PATH = "/home/ubuntu/.hypergrid-ssn/bin/hypergrid-ssnd";
 
-const maxLimitPerAddr = 1;
+const maxLimitPerAddr = 5;
 const eightHoursTs = 1000 * 60 * 60 * 8;
 let lastTs = 0;
 let requestCounts: any = {};
