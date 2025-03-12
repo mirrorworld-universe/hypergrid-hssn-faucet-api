@@ -1,7 +1,7 @@
 import { config as dotEnvConfig } from 'dotenv';
 dotEnvConfig();
 
-import { Connection, Keypair, PublicKey, sendAndConfirmTransaction, SystemProgram, Transaction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, SystemProgram, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import axios from "axios";
 import { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
@@ -41,7 +41,7 @@ let transfer_sol = async (address: string, amount: number): Promise<string> => {
   let toPubkey = new PublicKey(address)
   let lamports = Math.floor(amount * 1e9);
   console.log("after gen lamports");
-  let ix =SystemProgram.transfer({
+  let ix = SystemProgram.transfer({
     fromPubkey: id_kp.publicKey,
     toPubkey,
     lamports
@@ -98,7 +98,9 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(429).send({ message: "To maintain adequate balances for all users, the Faucet distributes 5 Test SOL every 8 hours." });
     }
 
+    /*
     const connection = new Connection('https://api.mainnet-beta.solana.com');
+    
     try {
       const publicKey = new PublicKey(req.params.user);
       const balance = await connection.getBalance(publicKey);
@@ -110,6 +112,7 @@ const airdrop = async (req: Request, res: Response, next: NextFunction) => {
     } catch (error) {
       return res.status(401).json({ error: 'Unable to get mainnet wallet balance' });
     }
+    */
 
 
     // const recipient = cmd.runSync([
