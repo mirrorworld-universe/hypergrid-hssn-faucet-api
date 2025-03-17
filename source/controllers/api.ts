@@ -13,10 +13,21 @@ const secretKey = process.env.SECRETKEY as string;
 const SOLANA_CLI_PATH = "/home/ubuntu/.local/share/solana/install/active_release/bin/solana";
 const ID_LOCATION = "/home/ubuntu/.config/solana/id.json"
 
+
+
+
 const maxLimitPerAddr = 3;
 const eightHoursTs = 1000 * 60 * 60 * 8;
 let lastTs = 0;
 let requestCounts: any = {};
+
+
+// for script airdrop 
+
+const scriptMaxLimitPerAddr = 5;
+const scriptEightHoursTs = 1000 * 60 * 60 * 8;
+let scriptLastTs = 0;
+let sciprtRequestCounts: any = {};
 
 // Add helper function
 const validateSolanaAddress = (address: string): boolean => {
@@ -191,4 +202,6 @@ const walletsCount = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-export default { airdrop, airdropWithApikey, walletsCount };
+
+
+export default {airdrop, airdropWithApikey, walletsCount };
