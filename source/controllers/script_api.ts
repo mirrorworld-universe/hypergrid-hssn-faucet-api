@@ -23,11 +23,11 @@ let requestCounts: any = {};
 
 
 
-let transfer_sol = async (address: string, amount: number): Promise<string> => {
-  console.log("start transfer sol")
+let transfer_lamports = async (address: string, amount: number): Promise<string> => {
+  console.log("start transfer lamports")
   let id_kp = get_keypair()
   let toPubkey = new PublicKey(address)
-  let lamports = Math.floor(amount * 1e9);
+  let lamports = Math.floor(amount);
   console.log("after gen lamports");
   let ix = SystemProgram.transfer({
     fromPubkey: id_kp.publicKey,
@@ -106,7 +106,7 @@ const scriptAirdrop = async (req: Request, res: Response, next: NextFunction) =>
 
 
 
-    let recipient = await transfer_sol(req.params.user, amount)
+    let recipient = await transfer_lamports(req.params.user, amount)
 
     if (requestCounts[clientAddr]) {
       requestCounts[clientAddr]++;
