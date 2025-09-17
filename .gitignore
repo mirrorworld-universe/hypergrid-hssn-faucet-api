@@ -6,3 +6,4 @@ logs/
 .env
 .wallets
 temp_test/
+env_bak
