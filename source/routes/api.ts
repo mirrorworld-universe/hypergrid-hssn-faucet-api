@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response } from "express";
 import sonic_ctl from "../controllers/api";
 import cosmos from "../controllers/api.hssn";
 import script_ctl from "../controllers/script_api";
+import bot_ctl from "../controllers/bot_ctl";
 
 
 const router = express.Router();
@@ -43,6 +44,7 @@ if (process.env.USE_CONTROLLER == "sonic") {
   router.get('/airdrop/:user/:amount/:token', sonic_ctl.airdrop);
   router.get('/wallets-count', sonic_ctl.walletsCount);
   router.post('/airdrop', sonic_ctl.airdropWithApikey);
+  router.post('/slack/send_message', bot_ctl.sendMessage);
 } else {
   router.get('/test', async (req: Request, res: Response, next: NextFunction) => {
     res.send("hello world for hssn");
