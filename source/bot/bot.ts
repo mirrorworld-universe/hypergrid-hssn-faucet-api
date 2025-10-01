@@ -5,8 +5,8 @@ import { assert_is_not_empty } from './util';
 class BotService {
     private slack: WebClient;
     constructor() {
-        assert_is_not_empty(process.env.SLACK_TOKEN, "slack token is not set");
-        this.slack = new WebClient(process.env.SLACK_TOKEN)
+        assert_is_not_empty(process.env.COMMON_BOT_SLACK_TOKEN, "slack token is not set");
+        this.slack = new WebClient(process.env.COMMON_BOT_SLACK_TOKEN)
     }
     public async sendMessage(message: string, slack_channel: string) {
         assert_is_not_empty(slack_channel, "slack_channel is not set");
