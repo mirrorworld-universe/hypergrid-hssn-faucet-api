@@ -5,7 +5,7 @@ import { WebClient } from '@slack/web-api';
 import { Connection, PublicKey } from '@solana/web3.js';
 import schedule from 'node-schedule';
 
-const WALLET_ADDRESS = '2b1opjN2ztTRe3jit8gN3Qc6AVVo5jixKmSqzfU4jkjP';
+const WALLET_ADDRESS = process.env.SONIC_SVM_FAUCET_WALLET as string;
 const THRESHOLD = 100000;
 const SLACK_TOKEN = process.env.SLACK_TOKEN as string;
 const SLACK_CHANNEL = process.env.SLACK_CHANNEL as string;
